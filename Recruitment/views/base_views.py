@@ -2,9 +2,13 @@ from django.shortcuts import render, get_object_or_404
 from ..models import Question
 from django.core.paginator import Paginator
 from django.db.models import F, Q, Count
+import logging
+logger = logging.getLogger('Recruitment')
 
 ''' 공모전 목록 출력 '''
 def index(request):
+    logger.info("INFO 레벨로 출력")
+
     # 입력 인자
     category = request.GET.get('category', '')
     status = request.GET.get('status', '')  # 모집 여부

@@ -193,5 +193,9 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'Recruitment': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
     }
 }
