@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load Recruitment_filter %}
+{% block content %}
+{% load static %}
+
+<div class="container my-3">
+    <div class="row">
+        <div class="col-md-7">  <!-- 화면의 왼쪽 -->
+            <h3 style="margin-left: 15px;">{{ question.title }}</h3>
+            <div class="d-flex">
+                <span class="ml-3 col-md-8">
+                    <span style="margin-right: 10px;"> 시작: {{ question.start_date|date:"Y.m.d" }} </span>
+                    <span> 종료: {{ question.end_date|date:"Y.m.d" }} </span>
+                </span>
+                <span class="col-md-4 justify-content-end align-items-center">
+                    <span style="margin-right: 10px; background-color: transparent;
+                    height: 30px;">
+                        팀원 {{ question.num_people }}명
+                    </span>
+                    <a href="#" data-uri="{% url 'Recruitment:vote_question' question.id %}"
+                           class="recommend btn btn-sm btn-danger">관심</a>
+                    <span class="ml-2">{{ question.voter.count }}</span>
+                </span>
+            </div>
+            <div>
+                <a href="{{ question.url }}">
+                    <img class="responsive-image" src="{{ question.image.url }}" alt="{{ question.title }} image"
+                    style="width: 600px; padding-top: 10px; margin-left: 10px;">
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-5">  <!-- 화면의 오른쪽 -->
+
+            <div class="border-bottom py-2 my-3 d-flex align-items-center mb-2">
+                <!-- 게시물 올린 사람 이름을 표시하는 배지 -->
+                <a href="{% url 'users:profile' question.author.pk %}">
+                    {% if not question.author.profile.user_image %}
+                        <img class="p-2 mr-2" src="{% static 'profile_default.jpeg' %}" alt="user_image" width="55" height="55" style="border-radius:50%;">
+                    {% else %}
+                        <img class="p-2 mr-2" src="{{ question.author.profile.user_image.url }}" alt="user_image" width="55" height="55" style="border-radius:50%;">
+                    {% endif %}
+                </a>
+
+                <div>
+                    {% if question.author.profile.nickname %}
+                        <p style="font-size: 0.7rem; margin-bottom: 0;">{{ question.author.profile.nickname }}</p>
+                    {% else %}
+                        <p style="font-size: 0.7rem; margin-bottom: 0;">{{ question.author.username }}</p>
+                    {% endif %}
+                    <span class="mx-0">{{ question.comment }}</span>
+                    <span class="text-muted ml-2 small">
+                        {% if question.modify_date %}
+                            {{ question.modify_date|date:"Y.m.d" }} (수정)
+                        {% else %}
+                            {{ question.create_date|date:"Y.m.d" }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- 수정, 삭제 버튼 -->
+                <div class="pl-4 d-flex justify-content-end">
+                    {% if request.user == question.author %}
+                        <a href="{% url 'Recruitment:question_modify' question.id %}"
+                           class="btn btn-sm btn-outline-primary mr-2"
+                            style="padding: 4px 6px;">수정</a>
+                        <a href="#" class="question_delete btn btn-sm btn-outline-primary"
+                           data-uri="{% url 'Recruitment:question_delete' question.id %}"
+                            style="padding: 4px 6px;">삭제</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% for answer in question.answer_set.all %}
+                <a name="answer_{{ answer.id }}"></a>
+                <div class="d-flex align-items-center mb-2">
+                    {% if answer.isteam == 1 %}
+                        <a href="#" data-uri="{% url 'Recruitment:noadd_team' answer.id %}"
+                       class="answer_with btn btn-sm btn-pink mr-3">Team</a>
+                    {% elif answer.isteam == 0 %}
+                        <a href="#" data-uri="{% url 'Recruitment:add_team' answer.id %}"
+                       class="answer_with btn btn-sm btn-outline-light mr-3">With</a>
+                    {% endif %}
+
+                    <!-- 댓글 단 사람 프로필 사진 -->
+                    <a href="{% url 'users:profile' answer.author.pk %}">
+                        {% if not answer.author.profile.user_image %}
+                            <img class="answer_image p-2 mr-2" src="{% static 'profile_default.jpeg' %}" alt="user_image" width="55" height="55" style="border-radius:50%;">
+                        {% else %}
+                            <img class="answer_image p-2 mr-2" src="{{ answer.author.profile.user_image.url }}" alt="user_image" width="55" height="55" style="border-radius:50%;">
+                        {% endif %}
+                    </a>
+
+                    <div>
+                        {% if answer.author.profile.nickname %}
+                            <p style="font-size: 0.7rem; margin-bottom: 0;">{{ answer.author.profile.nickname }}</p>
+                        {% else %}
+                            <p style="font-size: 0.7rem; margin-bottom: 0;">{{ answer.author.username }}</p>
+                        {% endif %}
+                        <span class="mx-0">{{ answer.comment }}</span>
+                        <span class="text-muted ml-2 small">{{ answer.create_date|date:"Y.m.d" }}</span>
+                    </div>
+
+                    {% if request.user == answer.author %}
+                        <a href="#" class="answer_delete btn btn-sm btn-outline-primary ml-3"
+                           data-uri="{% url 'Recruitment:answer_delete' answer.id %}" style="background-color: transparent;">신청취소</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <form action="{% url 'Recruitment:answer_create' question.id %}" method="post" class="my-3">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for field in form %}
+                            {% if field.errors %}
+                                <strong>{{ field.label }}</strong>
+                                {{ field.errors }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="d-flex">
+                    <span class="form-group col-md-10">
+                        <!-- 로그아웃 상태이거나 질문 작성자와 댓글 작성자가 동일하면 입력 불가 -->
+                        <textarea name="comment" id="comment"
+                            {% if not user.is_authenticated or question.author == user %}disabled{% endif %}
+                            class="form-control" rows="1"
+                            style="width: 350px; background-color: transparent; border: 4px solid white;"></textarea>
+                    </span>
+                    <span class="col-md-2">
+                        <input type="submit" value="팀원 신청" class="btn btn-sm btn-outline-primary"
+                        style="height: 35px; background-color: transparent; margin-top: 5px;">
+                    </span>
+                </div>
+            </form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        // '삭제' 버튼 클릭 - 확인 창 - '확인' 버튼 클릭 - data-uri 속성값으로 URL이 호출됨
+        $(".question_delete").on('click', function() {
+            if(confirm('정말 삭제할까요? 삭제 시 되돌릴 수 없어요!')) {
+                location.href = $(this).data('uri');
+            }
+        });
+
+        $(".answer_delete").on('click', function() {
+            if(confirm('팀원 신청을 취소할까요?')) {
+                location.href = $(this).data('uri');
+            }
+        });
+
+        // '추천' 버튼 클릭 - data-uri 속성값으로 URL이 호출됨
+        $(".recommend").on('click', function() {
+            location.href = $(this).data('uri');
+        });
+
+        $('.answer_with').on('click', function(e) {
+            e.preventDefault(); // 기본 링크 동작 방지
+            var $this = $(this);
+            var uri = $this.data('uri');
+            var isPink = $this.hasClass('btn-pink');
+
+            if (isPink) {
+                if (confirm('팀원에서 제외할까요?')) {
+                    $.ajax({
+                        url: uri,
+                        method: 'POST',
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                $this.removeClass('btn-pink').addClass('btn-outline-light').text('With');
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('팀을 개설한 사람만 팀원을 선택할 수 있어요!');
+                        }
+                    });
+                }
+            } else {
+                if (confirm('팀원에 포함할까요?')) {
+                    $.ajax({
+                        url: uri,
+                        method: 'POST',
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                $this.removeClass('btn-outline-light').addClass('btn-pink').text('Team');
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('팀을 개설한 사람만 팀원을 선택할 수 있어요!');
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

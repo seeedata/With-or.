@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load Recruitment_filter %}
+{% block content %}
+
+<div class="container my-3">
+    <div class="row">
+        <div class="col-sm-12 col-md-3 col-lg-2 p-4 d-flex flex-column align-items-center">
+            <ul class="list-inline" style="padding-top: 30px;">
+                <div>
+                    <li class="list-inline-item list-category" aria-current="category" style="margin-bottom: 10px;">
+                        <a class="category" data-category="" href="#">All</a>
+                    </li>
+                </div>
+                <div>
+                    <li class="list-inline-item list-category" aria-current="category" style="margin-bottom: 10px;">
+                        <a class="category" data-category="1" href="#">데이터/AI/SW</a>
+                    </li>
+                </div>
+                <div>
+                    <li class="list-inline-item list-category" aria-current="category" style="margin-bottom: 10px;">
+                        <a class="category" data-category="2" href="#">콘텐츠</a>
+                    </li>
+                </div>
+                <div>
+                <li class="list-inline-item list-category" aria-current="category" style="margin-bottom: 10px;">
+                    <a class="category" data-category="3" href="#">기획/아이디어</a>
+                </li></div>
+            </ul>
+        </div>
+
+        <div class="col-sm-12 col-md-9 col-lg-10 p-2">
+            <div class="row d-flex justify-content-between align-items-end mb-3" style="border-bottom: 1px solid white;">
+                <div class="d-flex">
+                    <ul class="list-inline" style="margin-bottom: 5px;">
+                        <li class="list-inline-item" aria-current="status" style="margin-left: 10px; ">
+                            <a class="status" data-status="" href="#" style="margin-bottom: 5px;">All</a>
+                        </li>
+                        <li class="list-inline-item" aria-current="status">
+                            <a class="status" data-status="ongoing" href="#">모집중</a>
+                        </li>
+                        <li class="list-inline-item" aria-current="status">
+                            <a class="status" data-status="completed" href="#">모집완료</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="col-3">
+                        <select class="form-control so" style="height: 35px; color: black; background-color: transparent; border: 3px solid white; margin-bottom: 5px; margin-right: 10px;">
+                            <option value="recent" {% if so == 'recent' %}selected{% endif %}>최신순</option>
+                            <option value="recommend" {% if so == 'recommend' %}selected{% endif %}>관심순</option>
+                            <option value="popular" {% if so == 'popular' %}selected{% endif %}>인기순</option>
+                        </select>
+                    </div>
+                    <div class="col-5 input-group">
+                        <input type="text" class="form-control kw" value="{{ kw|default_if_none:'' }}"
+                        style="height: 35px; background-color: transparent; border: 3px solid white;">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="btn_search"
+                                style="height: 35px; background-color: transparent; border: 1px solid white; margin-bottom: 5px; margin-right: 10px;">검색</button>
+                        </div>
+                    </div>
+                    <a href="{% url 'Recruitment:question_create' %}">
+                        <button class="btn btn-primary" style="height: 35px; background-color: #F806CC; border: 1px solid white; margin-bottom: 5px; margin-right: 10px;">With?</button>
+                    </a>
+                </div>
+            </div>
+            {% if question_list %}
+                <div class="row">
+                    {% for question in question_list %}
+                        <div class="col-md-4 mb-4">  <!-- 한 행에 3개의 카드 -->
+                            <div class="card h-100" style="background-color: transparent; border: 4px solid white;">
+                                <a href="{% url 'Recruitment:detail' question.id %}">  <!-- 이미지 클릭 시 공모전 상세로 이동 -->
+                                    <img class="card-img-top img-fluid" src="{{ question.image.url }}" alt="{{ question.title }} image"
+                                    style = "height: 250px; object-fit: cover; ">
+                                </a>
+                                <a href="{% url 'Recruitment:detail' question.id %}">
+                                    <div class="card-body" style="padding: 9px; height: 6rem; color: black; ">
+                                        <h6 class="card-title">{{ question.title }}</h6>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="card-text" style="font-size: 0.87rem;">{{ question.start_date|date:"Y.m.d" }} ~ {{ question.end_date|date:"Y.m.d" }}</span>
+                                            <span style="font-size: 0.8rem;">by {{ question.author.username }}</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <div class="card-footer d-flex justify-content-between align-items-center" style="padding: 7px; background-color: white;">
+                                    {% if question.remaining_people <= 0 %}
+                                        <small class="text-muted">0명 남았어요!</small>
+                                        <button type="button" class="btn btn-sm btn-secondary ml-auto">마감</button>
+                                    {% else %}
+                                        <small class="text-muted">{{ question.remaining_people }}명 남았어요!</small>
+                                        <button type="button" class="btn btn-sm btn-success ml-auto">모집중</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                            </div><div class="row"> <!-- 세 개의 카드가 채워지면 새로운 행 시작 -->
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>팀원을 모집해볼까요?</p>
+            {% endif %}
+
+            <!-- 페이징 처리 시작 -->
+            <ul class="pagination justify-content-center">
+                <!-- 이전 페이지가 있으면 '이전' 링크 활성화. 이전 페이지가 없으면 '이전' 링크 비활성화. -->
+                {% if question_list.has_previous %}
+                    <li class="page-item">
+                        <!-- 모든 페이지 링크를 href 속성에 직접 입력하는 대신, data-page 속성으로 값을 읽을 수 있도록 한다 -->
+                        <a class="page-link" data-page="{{ question_list.previous_page_number }}" href="#">이전</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" tabindex="-1" aria-disabled="true" href="#">이전</a>
+                    </li>
+                {% endif %}
+
+                <!-- 페이지 리스트 -->
+                {% for page_number in question_list.paginator.page_range %}
+                    <!-- 페이지 번호가 현재 페이지 기준으로 좌우 2개씩 보임 -->
+                    {% if page_number >= question_list.number|add:-2 and page_number <= question_list.number|add:2 %}
+                        <!-- 현재 페이지 번호는 active 클래스로 강조 표시 -->
+                        {% if page_number == question_list.number %}
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link" data-page="{{ page_number }}" href="#">
+                                    {{ page_number }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" data-page="{{ page_number }}" href="#">
+                                    {{ page_number }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- 다음 페이지가 있으면 '다음' 링크 활성화. 다음 페이지가 없으면 '다음' 링크 비활성화. -->
+                {% if question_list.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" data-page="{{ question_list.next_page_number }}" href="#">다음</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" tabindex="-1" aria-disabled="true" href="#">다음</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <!-- 페이징 처리 끝 -->
+        </div>
+    </div>
+</div>
+
+<form id="searchForm" method="get" action="{% url 'Recruitment:index' %}">
+    <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+    <input type="hidden" id="so" name="so" value="{{ so }}">
+    <input type="hidden" id="status" name="status" value="{{ status }}">
+    <input type="hidden" id="category" name="category" value="{{ category }}">
+</form>
+
+{% endblock %}
+
+
+{% block script %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        // class 속성이 page-link인 링크를 누르면
+        $(".page-link").on('click', function() {
+            // 클릭한 링크의 data-page 값을 id가 page인 hidden 필드에 설정
+            // 즉, searchForm의 page 필드에 그 값을 설정한다
+            $("#page").val($(this).data("page"));
+            // 폼을 요청한다
+            $("#searchForm").submit();
+        });
+        // id 속성이 btn_search인 검색 버튼을 클릭하면
+        $("#btn_search").on('click', function() {
+            // 검색창(class 속성이 kw)에 입력된 값을 id가 kw인 hidden 필드에 설정
+            // 즉, searchForm의 kw 필드에 그 값을 설정한다
+            $("#kw").val($(".kw").val());
+            // 1페이지부터 조회한다
+            $("#page").val(1);
+            // 폼을 요청한다
+            $("#searchForm").submit();
+        });
+        // class 속성이 so인 엘리먼트, 즉 정렬 조건에 해당하는 select의 값이 변경되면
+        $(".so").on('change', function() {
+            // searchForm의 so 필드에 그 값을 설정한다
+            $("#so").val($(this).val());
+            // 1페이지부터 조회한다
+            $("#page").val(1);
+            // 폼을 요청한다
+            $("#searchForm").submit();
+        });
+        // class 속성이 list-inline-item인 링크를 누르면
+        $(".list-inline-item").on('click', function() {
+            // 클릭한 링크의 data-status 값을 id가 page인 hidden 필드에 설정
+            // 즉, searchForm의 page 필드에 그 값을 설정한다
+            $("#status").val($(this).find('.status').data("status"));
+            // 폼을 요청한다
+            $("#searchForm").submit();
+        });
+        $(".list-category").on('click', function() {
+            // 클릭한 링크의 data-status 값을 id가 page인 hidden 필드에 설정
+            // 즉, searchForm의 page 필드에 그 값을 설정한다
+            $("#category").val($(this).find('.category').data("category"));
+            // 폼을 요청한다
+            $("#searchForm").submit();
+        });
+
+
+
+    });
+</script>
+{% endblock %}

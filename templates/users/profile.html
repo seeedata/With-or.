@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load Recruitment_filter %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
+
+<div class="row">
+    <div class="col-md-6 pt-5 pr-0">  <!-- 화면의 왼쪽 -->
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 d-flex flex-column justify-content-center">
+                {% if profile_user.profile.user_image %}
+                    <img class="round mb-3" src="{{profile_user.profile.user_image.url}}" width="200" height="200">
+                {% else %}
+                    <img class="round mb-3" src="{% static 'profile_default.jpeg' %}" width="200" height="200" style="margin-right: 100px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <h4>{{ profile_user.profile.nickname }}</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 d-flex flex-column align-items-center">
+            {% if user == profile_user %}
+                <h5>{{ user }}</h5>
+                <h5>{{ profile_user.email }}</h5>
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.github_url }}">Github</a></span>
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.blog_url }}">Blog</a></span>
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.sns_url }}">SNS</a></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                {% if user == profile_user %}   <!-- 로그인한 사용자와 profile_user가 일치할 때만 프로필 편집 버튼 출력 -->
+                <a href="{% url 'users:profile_modify' profile_user.pk %}">
+                    <button type="button" class="btn btn-primary" style="margin-top: 12px; height: 35px; background-color: #F806CC; border: 1px solid #F806CC;">프로필 편집</button>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6" style="padding-left: 60px; padding-top: 60px;">  <!-- 화면 오른쪽 -->
+        <h5>
+            <span style="color: white; margin-right: 10px;">전공</span>
+            {% if profile_user.profile.major2 %}
+            <span>{{ profile_user.profile.major1 }} / {{ profile_user.profile.major2 }}</span>
+            {% else %}
+            <span>{{ profile_user.profile.major1 }}</span>
+            {% endif %}
+        </h5>
+        <h5>
+            <span style="color: white; margin-right: 10px;">학년</span>
+            <span>{{ profile_user.profile.grade }} ({{ profile_user.profile.age }}세)</span>
+        </h5>
+
+        {% if profile_user.profile.club %}
+            <h5 style="color: white;">동아리/학회</h5>
+            <div>{{ profile_user.profile.club|mark }}</div>
+        {% endif %}
+
+        {% if profile_user.profile.activity %}
+            <h5 style="color: white;">대외활동</h5>
+            <div>{{ profile_user.profile.activity|mark }}</div>
+        {% endif %}
+
+        {% if profile_user.profile.contest %}
+            <h5 style="color: white;">공모전</h5>
+            <div>{{ profile_user.profile.contest|mark }}</div>
+        {% endif %}
+
+        {% if profile_user.profile.intern %}
+            <h5 style="color: white;">인턴/학부연구생</h5>
+            <div>{{ profile_user.profile.intern }}</div>
+        {% endif %}
+
+        {% if profile_user.profile.intro %}
+            <h5 style="color: white;">소개</h5>
+            <div>{{ profile_user.profile.intro }}</div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

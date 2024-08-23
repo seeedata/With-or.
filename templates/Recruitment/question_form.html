@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load Recruitment_filter %}
+{% block content %}
+
+<div class="container">
+    <h4 class="my-3 border-bottom pb-2 d-flex justify-content-center">팀 만들기</h4>
+    <form method="post" class="post-form my-3" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- 오류 표시 -->
+        {% if form.errors %}
+            <!-- 빨간색 경고 박스. role로 경고 메시지임을 명시 -->
+            <div class="alert alert-danger" role="alert">
+                {% for field in form %}
+                    {% if field.errors %}
+                        <strong>{{ field.label }}</strong>
+                        {{ field.errors }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="linkareer">링커리어 링크</label>
+            <div class="row">
+                <input type="url" class="form-control" name="linkareer" id="linkareer"
+                       value="{{ form.linkareer.value|default_if_none:'' }}"
+                    style="background-color: transparent; border: 4px solid white; width: 700px; margin-left: 20px;">
+                <button type="submit" name="crawl" class="btn btn-primary" style="margin-left: 20px; background-color: #F806CC; border: 1px solid #F806CC;">공모전 정보 불러오기</button>
+            </div>
+            <small class="form-text text-muted" style="margin-left: 10px;">공모전 정보가 있는 링커리어 링크를 입력하세요. 자동으로 정보가 입력됩니다.</small>
+        </div>
+
+        <div class="row d-flex justify-content-between">
+            <div class="form-group" style="margin-left: 20px;">
+                <label for="title">제목</label>
+                <input type="text" class="form-control" name="title" id="title"
+                       value="{{ form.title.value|default_if_none:'' }}"
+                style="width: 300px; background-color: transparent; border: 4px solid white;">
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">공모전 시작일</label>
+                <input type="date" class="form-control" name="start_date" id="start_date"
+                       value="{{ form.start_date.value|default:form.instance.start_date|date:"Y-m-d" }}"
+                style="width: 300px; background-color: transparent; border: 4px solid white;">
+            </div>
+
+            <div class="form-group" style="margin-right: 20px;">
+                <label for="end_date">공모전 마감일</label>
+                <input type="date" class="form-control" name="end_date" id="end_date"
+                       value="{{ form.end_date.value|default:form.instance.end_date|date:"Y-m-d" }}"
+                style="width: 300px; background-color: transparent; border: 4px solid white;">
+            </div>
+        </div>
+
+        <div class="row d-flex justify-content-between">
+            <div class="form-group" style="margin-left: 20px;">
+                <label for="image">공모전 이미지 업로드</label>
+                <input type="file" class="form-control" name="image" id="image" accept="image/*"
+                style="width: 300px; background-color: transparent; border: 4px solid white;">
+            </div>
+
+            <div class="form-group">
+                <label for="category">카테고리 선택</label>
+                <select class="form-control" name="category" id="category" style="width: 300px; background-color: transparent; border: 4px solid white;">
+                    <option value="1" {% if form.category.value == 1 %}selected{% endif %}>데이터/AI/프로그래밍</option>
+                    <option value="2" {% if form.category.value == 2 %}selected{% endif %}>콘텐츠</option>
+                    <option value="3" {% if form.category.value == 3 %}selected{% endif %}>기획/아이디어</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right: 20px;">
+                <label for="num_people">모집할 팀원 수</label>
+                <input type="number" class="form-control" name="num_people" id="num_people"
+                       value="{{ form.num_people.value|default_if_none:'' }}" min="1"
+                style="width: 300px; background-color: transparent; border: 4px solid white;">
+                <small class="form-text text-muted">본인을 제외한, 팀원의 수를 입력하세요.</small>
+            </div>
+        </div>
+
+        <div class="form-group" >
+            <label for="url">공모전 사이트 링크</label>
+            <input type="url" class="form-control" name="url" id="url"
+                       value="{{ form.url.value|default_if_none:'' }}"
+                style="background-color: transparent; border: 4px solid white; width: 700px; margin-left: 7px;">
+        </div>
+
+        <div class="form-group">
+            <label for="comment">짧은 한마디</label>
+            <div class="row">
+                <input type="text" class="form-control" name="comment" id="comment"
+                       value="{{ form.comment.value|default_if_none:'' }}"
+                style="background-color: transparent; border: 4px solid white; width: 700px; margin-left: 20px;">
+                <button type="submit" class="btn btn-primary" style="margin-left: 20px; margin-bottom: 20px; height: 35px; background-color: #F806CC; border: 1px solid #F806CC;">등록</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
