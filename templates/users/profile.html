@@ -9,11 +9,11 @@
     <div class="col-md-6 pt-5 pr-0">  <!-- 화면의 왼쪽 -->
         <div class="row">
             <div class="col-md-8"></div>
-            <div class="col-md-4 d-flex flex-column justify-content-center">
+            <div class="col-md-4 d-flex flex-column align-items-center">
                 {% if profile_user.profile.user_image %}
                     <img class="round mb-3" src="{{profile_user.profile.user_image.url}}" width="200" height="200">
                 {% else %}
-                    <img class="round mb-3" src="{% static 'profile_default.jpeg' %}" width="200" height="200" style="margin-right: 100px;">
+                    <img class="round mb-3" src="{% static 'profile_default.jpeg' %}" width="200" height="200">
                 {% endif %}
             </div>
         </div>
@@ -38,9 +38,9 @@
         <div class="row">
             <div class="col-md-8"></div>
             <div class="col-md-4 d-flex justify-content-center align-items-center">
-                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.github_url }}">Github</a></span>
-                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.blog_url }}">Blog</a></span>
-                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.sns_url }}">SNS</a></span>
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.github_url }}" style="color: white;">Github</a></span>
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.blog_url }}" style="color: white;">Blog</a></span>
+                <span style="margin-right: 10px;"><a href="{{ profile_user.profile.sns_url }}" style="color: white;">SNS</a></span>
             </div>
         </div>
 
@@ -87,12 +87,12 @@
 
         {% if profile_user.profile.intern %}
             <h5 style="color: white;">인턴/학부연구생</h5>
-            <div>{{ profile_user.profile.intern }}</div>
+            <div>{{ profile_user.profile.intern|mark }}</div>
         {% endif %}
 
         {% if profile_user.profile.intro %}
             <h5 style="color: white;">소개</h5>
-            <div>{{ profile_user.profile.intro }}</div>
+            <div>{{ profile_user.profile.intro|mark }}</div>
         {% endif %}
 
     </div>

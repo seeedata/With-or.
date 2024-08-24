@@ -58,7 +58,6 @@ def index(request):
         question_list = question_list.filter(
             # __icontains: 대소문자를 가리지 않고, 필드에 문자열이 포함되었는지 찾아줌
             Q(title__icontains=kw) |  # 제목 검색
-            Q(content__icontains=kw) |  # 내용 검색
             Q(comment__icontains=kw) |  # 짧은 한마디 검색
             Q(author__username__icontains=kw) |  # 질문 글쓴이 검색
             Q(answer__author__username__icontains=kw)  # 답변 글쓴이 검색
